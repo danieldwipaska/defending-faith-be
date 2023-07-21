@@ -62,15 +62,24 @@ export class CommentsService {
     return `This action updates a #${id} comment`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async remove(id: string): Promise<Comment> {
+    try {
+      const comment: Comment = await this.commentModel.findOneAndDelete({
+        commentId: id,
+      });
+      if (!comment) throw new NotFoundException('Comment Not Found');
+
+      return comment;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error');
+    }
   }
 
   //DELETE A USER
   async deleteByUserId(userId: string): Promise<any> {
     try {
       const user = await this.userModel.findOne({ userId });
-      const comment = await this.commentModel.deleteMany({
+      await this.commentModel.deleteMany({
         username: user.username,
       });
 
